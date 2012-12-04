@@ -1,0 +1,13 @@
+
+# java binaries
+bin/
+*.class
+
+
+# eclipse files
+javadoc.xml
+.project
+.classpath
+
+# some of my own files
+var/
