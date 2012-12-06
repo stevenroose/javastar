@@ -105,6 +105,19 @@ public abstract class NodeExpander<N extends Node, C extends Cost<C>> {
 	public abstract boolean areAdjacent(N node1, N node2);
 	
 	/**
+	 * This method allows you to define your own stop criterium for the calculation.
+	 * This method is called before every node gets expanded.
+	 * 
+	 * The default value is <code>false</code>.
+	 * 
+	 * @return	<code>true</code> is the calculation should stop, 
+	 * 			<code>false</code> if it should continue
+	 */
+	public boolean isStopCriteriumReached() {
+		return false;
+	}
+	
+	/**
 	 * Expand a StateNode to a Set of StateNodes.
 	 * This method uses the NodeExpander.expand() method and adds cost and heuristic values.
 	 * 
@@ -119,7 +132,7 @@ public abstract class NodeExpander<N extends Node, C extends Cost<C>> {
 			if(n.equals(node.getPreviousNode()))
 				continue;
 			expansion.add(new StateNode<N, C>(n, 
-					node.getCumulatedCost().add(getCostBetweenNodes(node.getNode(), n)), 
+					node.getAcumulatedCost().add(getCostBetweenNodes(node.getNode(), n)), 
 					calculateHeuristic(n), 
 					node));
 		}
