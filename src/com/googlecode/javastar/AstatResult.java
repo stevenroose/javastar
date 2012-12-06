@@ -38,17 +38,42 @@ public class AstatResult<N extends Node, C extends Cost<C>> {
 	 */
 	public enum ResultType {
 		/**
-		 * The calculation failed. This usually means the goal is not reachable.
-		 */
-		FAIL,
-		/**
 		 * The calculation was successful and a path was found.
 		 */
-		SUCCESS
+		SUCCESS (true),
+		/**
+		 * The calculation failed. This usually means the goal is not reachable.
+		 */
+		FAIL (false),
+		/**
+		 * Failed because all nodes were expanded and no solution was found.
+		 */
+		FAIL_ALL_NODES_EXPANDED (false),
+		/**
+		 * The maximum number of nodes to expand has been reached.
+		 */
+		FAIL_MAX_NODES_EXPANDED (false),
+		/**
+		 * Failed because the user-defined stop criterium was reached.
+		 */
+		FAIL_USER_STOP_CRITERIUM (false);
+		
+		private final boolean success;
+		
+		private ResultType(boolean success) {
+			this.success = success;
+		}
+		
+		public boolean isSuccess() {
+			return success;
+		}
 	}
 	
 	private final ResultType type;
+	
 	private final StateNode<N, C> endNode;
+	
+	private final long numberOfNodesExpanded;
 
 	/**
 	 * Initialize a new result object.
@@ -58,9 +83,10 @@ public class AstatResult<N extends Node, C extends Cost<C>> {
 	 * @param	endNode
 	 * 			the last node in the path
 	 */
-	public AstatResult(ResultType type, StateNode<N, C> endNode) {
+	public AstatResult(ResultType type, StateNode<N, C> endNode, long numberOfNodesExpanded) {
 		this.type = type;
 		this.endNode = endNode;
+		this.numberOfNodesExpanded = numberOfNodesExpanded;
 	}
 	
 	/**
@@ -78,9 +104,9 @@ public class AstatResult<N extends Node, C extends Cost<C>> {
 	 * @return	the cost of the resulting path
 	 */
 	public C getCost() {
-		if(getType() == ResultType.FAIL)
+		if(!getType().isSuccess())
 			return null;
-		return endNode.getCumulatedCost();
+		return endNode.getAcumulatedCost();
 	}
 	
 	/**
@@ -90,7 +116,7 @@ public class AstatResult<N extends Node, C extends Cost<C>> {
 	 * @return a list of all nodes that form the resulting path
 	 */
 	public List<N> getPath() {
-		if(getType() == ResultType.FAIL)
+		if(!getType().isSuccess())
 			return null;
 		
 		LinkedList<N> result = new LinkedList<N>();
@@ -101,6 +127,29 @@ public class AstatResult<N extends Node, C extends Cost<C>> {
 			result.addFirst(curr.getNode());
 		}
 		return result;
+	}
+	
+	/**
+	 * Get the path length of the resulting path. 
+	 * The path length is expressed in the number of nodes the path contains.
+	 * If you want to know the path length expressed in the cost, use <code>getCost()</code>.   
+	 * 
+	 * @return	the number of nodes in the path
+	 */
+	public int getPathLength() {
+		if(!getType().isSuccess())
+			return 0;
+		return endNode.getPathLength();
+	}
+	
+	/**
+	 * This is the total number of nodes that were expanded in the process of finding the 
+	 * resulting solution.
+	 * 
+	 * @return	the total number of nodes expanded by the algorithm
+	 */
+	public long getNumberOfNodesExpanded() {
+		return numberOfNodesExpanded;
 	}
 
 }

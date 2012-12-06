@@ -33,18 +33,33 @@ import com.googlecode.javastar.AstatResult.ResultType;
  */
 public class AstarCalculator<N extends Node, C extends Cost<C>> {
 	
+	private enum State {
+		WAITING,
+		RUNNING,
+		FINISHED
+	}
+	
+	private State state;
+	
 	private HashMap<N, StateNode<N, C>> frontier;
 	private PriorityQueue<N> queue;
 	
 	private NodeExpander<N, C> expander;
 	
+	private long numberOfNodesExpanded;
+	
+	private ResultType resultType;
 	private AstatResult<N, C> result;
+	
+	private long maximumNumberOfNodesToExpand = 0;
+	
 	
 	/**
 	 * Create a new A star calculator object with your own NodeExpander subclass.
 	 */
 	public AstarCalculator(NodeExpander<N, C> nodeExpander) {
 		this.expander = nodeExpander;
+		this.state = State.WAITING;
 	}
 	
 	/**
@@ -53,6 +68,7 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 	 * When the calculation is finished, the result will be in <code>getResult()</code>.
 	 */
 	public synchronized void start() {
+		state = State.RUNNING;
 		initialize();
 		addNode(new StateNode<N, C>(expander.getStartNode(), 
 				expander.getZeroCost(), 
@@ -60,6 +76,27 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 				null));
 		expandAll();
 		createResult();
+	}
+	
+	/**
+	 * Specify how many nodes should be expanded at most. 
+	 * The algorithm will stop if this number of nodes have been expanded.
+	 *  
+	 * @param 	maximumNumberOfNodesToExpand
+	 * 			the maximum number of nodes to expand
+	 * 
+	 * @throws	IllegalArgumentException
+	 * 			if <code>maximumNumberOfNodesToExpand</code> is lower than 0
+	 * @throws	IllegalStateException
+	 * 			if the calculation is already running
+	 */
+	public void setMaximumNumberOfNodesToExpand(long maximumNumberOfNodesToExpand) 
+			throws IllegalStateException, IllegalArgumentException {
+		if(state == State.RUNNING)
+			throw new IllegalStateException("Already running.");
+		if(maximumNumberOfNodesToExpand < 0)
+			throw new IllegalArgumentException("Argument must be at least 0.");
+		this.maximumNumberOfNodesToExpand = maximumNumberOfNodesToExpand;
 	}
 	
 	/**
@@ -81,6 +118,8 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 	 */
 	private void initialize() {
 		result = null;
+		numberOfNodesExpanded = 0;
+		
 		frontier = new HashMap<N, StateNode<N,C>>();
 		queue = new PriorityQueue<N>(10, new Comparator<N>() {
 			
@@ -108,8 +147,32 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 	 * @return	whether or not another expansion should be done
 	 */
 	private boolean shouldExtractMore() {
-		return !queue.peek().equals(expander.getGoalNode()) &&
-				!queue.isEmpty();
+		if( queue.peek().equals(expander.getGoalNode()) ) {
+			// solution found
+			resultType = ResultType.SUCCESS;
+			return false;
+		}
+		
+		if( queue.isEmpty() ) {
+			// no more nodes to expand
+			resultType = ResultType.FAIL_ALL_NODES_EXPANDED;
+			return false;
+		}
+		
+		if( maximumNumberOfNodesToExpand != 0 && 
+				numberOfNodesExpanded >= maximumNumberOfNodesToExpand ) {
+			// expanded the maximum number of nodes
+			resultType = ResultType.FAIL_MAX_NODES_EXPANDED;
+			return false;
+		}
+		
+		if( expander.isStopCriteriumReached() ) {
+			// user-defined stop criterium reached
+			resultType = ResultType.FAIL_USER_STOP_CRITERIUM;
+			return false;
+		}
+		
+		return true;
 	}
 	
 	/**
@@ -138,6 +201,7 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 			addNode(n);
 		}
 		
+		numberOfNodesExpanded++;
 		frontier.remove(node.getNode());
 	}
 	
@@ -145,14 +209,19 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 	 * Create the result object.
 	 */
 	private void createResult() {
-		if(queue.peek().equals(expander.getGoalNode())) {
+		if(resultType.isSuccess()) {
 			// success
-			result = new AstatResult<N, C>(ResultType.SUCCESS, frontier.get(queue.peek()));
+			result = new AstatResult<N, C>(resultType, 
+					frontier.get(queue.peek()), 
+					numberOfNodesExpanded);
 		}
 		else {
 			// fail
-			result = new AstatResult<N, C>(ResultType.FAIL, null);
+			result = new AstatResult<N, C>(resultType, 
+					null, 
+					numberOfNodesExpanded);
 		}
+		state = State.FINISHED;
 	}
 	
 	/**
@@ -173,7 +242,7 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 	 */
 	private void removeNode(StateNode<N, C> node) {
 		queue.remove(node.getNode());
-		frontier.remove(node);
+		frontier.remove(node.getNode());
 	}
 
 }
