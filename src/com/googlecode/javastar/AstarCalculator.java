@@ -63,11 +63,11 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 	}
 	
 	/**
-	 * Start the calculation.
+	 * Run the calculation.
 	 * 
 	 * When the calculation is finished, the result will be in <code>getResult()</code>.
 	 */
-	public synchronized void start() {
+	public synchronized void run() {
 		state = State.RUNNING;
 		initialize();
 		addNode(new StateNode<N, C>(expander.getStartNode(), 
