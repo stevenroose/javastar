@@ -29,16 +29,17 @@ package com.googlecode.javastar;
 public class StateNode<N extends Node, C extends Cost<C>> {
 	
 	private N node;
-	private C cumulatedCost;
+	private C accumulatedCost;
 	private C heuristic;
 	private StateNode<N, C> previousNode;
+	private int pathLength;
 	
 	/**
 	 * Create a new StateNode
 	 * 
 	 * @param 	node
 	 * 			the node this StateNode should represent
-	 * @param 	cumulatedCost
+	 * @param 	accumulatedCost
 	 * 			the cost of the node
 	 * @param 	heuristic
 	 * 			the heuristic value of the node
@@ -49,18 +50,23 @@ public class StateNode<N extends Node, C extends Cost<C>> {
 	 * 			If either of <code>node</code>, <code>cumulatedCost</code> or 
 	 * 			<code>heuristic</code> is <code>null</code>.
 	 */
-	public StateNode(N node, C cumulatedCost, C heuristic, StateNode<N, C> previousNode) throws IllegalArgumentException {
+	public StateNode(N node, C accumulatedCost, C heuristic, StateNode<N, C> previousNode) throws IllegalArgumentException {
 		if(node == null)
 			throw new IllegalArgumentException("A StateNode's node cannot be null");
-		if(cumulatedCost == null)
+		if(accumulatedCost == null)
 			throw new IllegalArgumentException("A StateNode's cost cannot be null");
 		if(heuristic == null)
 			throw new IllegalArgumentException("A StateNode's heuristic value cannot be null");
 		
 		this.node = node;
-		this.cumulatedCost = cumulatedCost;
+		this.accumulatedCost = accumulatedCost;
 		this.heuristic = heuristic;
 		this.previousNode = previousNode;
+		
+		if(previousNode != null)
+			pathLength = previousNode.getPathLength() + 1;
+		else
+			pathLength = 0;
 	}
 	
 	/**
@@ -73,12 +79,12 @@ public class StateNode<N extends Node, C extends Cost<C>> {
 	}
 	
 	/**
-	 * Returns the cumulated cost of the path from the start node until this node.
+	 * Returns the accumulated cost of the path from the start node until this node.
 	 * 
-	 * @return	the cumulated cost of the path from the start node until this node
+	 * @return	the accumulated cost of the path from the start node until this node
 	 */
-	public C getCumulatedCost() {
-		return cumulatedCost;
+	public C getAcumulatedCost() {
+		return accumulatedCost;
 	}
 	
 	/**
@@ -102,7 +108,18 @@ public class StateNode<N extends Node, C extends Cost<C>> {
 	 * @return	the sum of the cumulated cost and the heuristic value from this node
 	 */
 	public C getScore() {
-		return getCumulatedCost().add(getHeuristic());
+		return getAcumulatedCost().add(getHeuristic());
+	}
+	
+	/**
+	 * The path length of a node is the number of nodes between this node and the 
+	 * start node.
+	 * The start node has path length zero.
+	 * 
+	 * @return	the number of this node from the start node
+	 */
+	public int getPathLength() {
+		return pathLength;
 	}
 	
 	/**
