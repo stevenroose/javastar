@@ -28,12 +28,13 @@ import java.util.List;
  * @license	Apache License, Version 2.0
  *
  */
-public class AstatResult<N extends Node, C extends Cost<C>> {
+public class AstarResult<N extends Node, C extends Cost<C>> {
 	
 	/**
 	 * All the possible types a result can have.
 	 * 
 	 * @author Steven Roose
+	 * @license	Apache License, Version 2.0
 	 *
 	 */
 	public enum ResultType {
@@ -60,10 +61,21 @@ public class AstatResult<N extends Node, C extends Cost<C>> {
 		
 		private final boolean success;
 		
+		/**
+		 * The ResultType constructor.
+		 * 
+		 * @param 	success
+		 * 			whether or not the calculation was a success
+		 */
 		private ResultType(boolean success) {
 			this.success = success;
 		}
 		
+		/**
+		 * Check if this ResultType means that the calculation was a success or not.
+		 * 
+		 * @return	<code>true</code> if the calculation succeeded, <code>false</code> if it didn't
+		 */
 		public boolean isSuccess() {
 			return success;
 		}
@@ -74,6 +86,8 @@ public class AstatResult<N extends Node, C extends Cost<C>> {
 	private final StateNode<N, C> endNode;
 	
 	private final long numberOfNodesExpanded;
+	
+	private long calculationTime;
 
 	/**
 	 * Initialize a new result object.
@@ -83,10 +97,22 @@ public class AstatResult<N extends Node, C extends Cost<C>> {
 	 * @param	endNode
 	 * 			the last node in the path
 	 */
-	public AstatResult(ResultType type, StateNode<N, C> endNode, long numberOfNodesExpanded) {
+	public AstarResult(ResultType type, StateNode<N, C> endNode, long numberOfNodesExpanded, long calculationTime) {
 		this.type = type;
 		this.endNode = endNode;
 		this.numberOfNodesExpanded = numberOfNodesExpanded;
+		this.calculationTime = calculationTime;
+	}
+	
+	@Override
+	public String toString() {
+		if(getType().isSuccess()) {
+			return "AstarResult(type=" + getType().toString() + "; endNode=" 
+					+ endNode.getNode().toString() + "; cost=" + getCost().toString() + ")";
+		}
+		else {
+			return "AstarResult(type=" + getType().toString() + ")";
+		}
 	}
 	
 	/**
@@ -150,6 +176,15 @@ public class AstatResult<N extends Node, C extends Cost<C>> {
 	 */
 	public long getNumberOfNodesExpanded() {
 		return numberOfNodesExpanded;
+	}
+	
+	/**
+	 * Get the total time the algorithm needed to calculate this result in milliseconds.
+	 * 
+	 * @return	the calculation time in milliseconds
+	 */
+	public long getCalculationTime() {
+		return calculationTime;
 	}
 
 }

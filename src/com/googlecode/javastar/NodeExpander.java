@@ -20,6 +20,10 @@ import java.util.Set;
 
 /**
  * This class is where most calculations are performed.
+ * The user should extend this class and adapt it to his needs.
+ * 
+ * Note that only abstract methods are required to be implemented. 
+ * Changes to other methods can cause this package to stop working. 
  * 
  * @author 	Steven Roose
  * @license	Apache License, Version 2.0
@@ -93,7 +97,7 @@ public abstract class NodeExpander<N extends Node, C extends Cost<C>> {
 	public abstract C getZeroCost();
 	
 	/**
-	 * Check of <code>node1</code> and <code>node2</code> are adjacent nodes in the network.
+	 * Check if <code>node1</code> and <code>node2</code> are adjacent nodes in the network.
 	 * 
 	 * @param 	node1
 	 * 			the first node
@@ -105,15 +109,38 @@ public abstract class NodeExpander<N extends Node, C extends Cost<C>> {
 	public abstract boolean areAdjacent(N node1, N node2);
 	
 	/**
-	 * This method allows you to define your own stop criterium for the calculation.
-	 * This method is called before every node gets expanded.
+	 * If this method returns <code>true</code>, the user-defined stop criterium in 
+	 * <code>isStopCriteriumReached()</code> is checked before every expansion.
 	 * 
 	 * The default value is <code>false</code>.
+	 * 
+	 * @return	<code>true</code> if the user-defined stop criterium is enabled,
+	 * 			<code>false</code> otherwise
+	 */
+	public boolean isStopCriteriumEnabled() {
+		return false;
+	}
+	
+	/**
+	 * This method allows the user to define it's own stop criterium for the calculation.
+	 * This method is called before every node gets expanded.
+	 * 
+	 * This method is only used when <code>isStopCriteriumEnabled()</code> returns <code>true</code>.
+	 *  
+	 * @param	numberOfNodesExpanded
+	 * 			the total number of nodes expanded until now
+	 * @param	costOfCurrentNode
+	 * 			the cost of the node to be expanded next
+	 * @param	heuristicOfCurrentNode
+	 * 			the heuristic value of the node to be expanded next
+	 * @param	pathLengthOfCurrentNode
+	 * 			the path length to the node to be expanded next
 	 * 
 	 * @return	<code>true</code> is the calculation should stop, 
 	 * 			<code>false</code> if it should continue
 	 */
-	public boolean isStopCriteriumReached() {
+	public boolean isStopCriteriumReached(long numberOfNodesExpanded, 
+			C costOfCurrentNode, C heuristicOfCurrentNode, int pathLengthOfCurrentNode) {
 		return false;
 	}
 	
@@ -161,7 +188,7 @@ public abstract class NodeExpander<N extends Node, C extends Cost<C>> {
 	 * The exception exists because certain methods used in this class only accept nodes 
 	 * that are adjacent to each other. If they are not, this exception will be thrown.
 	 * <br /><code>getCostBetweenNodes(Node, Node)</code> is an example of such a method.
-	 * <br />It's up to the user of this class to choose whether or not to use this exception.
+	 * <br />It's up to the user to choose whether or not to use this exception.
 	 * 
 	 * @author 	Steven Roose
 	 * @license	Apache License, Version 2.0

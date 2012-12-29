@@ -16,9 +16,10 @@
 package com.googlecode.javastar;
 
 /**
- * Node classes should extend this abstract class. The reason this class exists is to
- * enforce users to override the <code>equals()</code> and <code>hashCode()</code> methods 
- * because the algorithm heavily relies on them.
+ * Node classes should extend this abstract class. 
+ * The reason this class is not an interface is to enforce users to override the 
+ * <code>equals()</code> and <code>hashCode()</code> methods because the algorithm heavily 
+ * relies on them.
  * <br />
  * Using good hashCode values means better performance of the algorithm.
  * 

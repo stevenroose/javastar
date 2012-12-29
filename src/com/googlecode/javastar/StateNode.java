@@ -29,9 +29,13 @@ package com.googlecode.javastar;
 public class StateNode<N extends Node, C extends Cost<C>> {
 	
 	private N node;
+	
 	private C accumulatedCost;
+	
 	private C heuristic;
+	
 	private StateNode<N, C> previousNode;
+	
 	private int pathLength;
 	
 	/**
@@ -63,6 +67,7 @@ public class StateNode<N extends Node, C extends Cost<C>> {
 		this.heuristic = heuristic;
 		this.previousNode = previousNode;
 		
+		// increment previous pathLength or set to zero for start node
 		if(previousNode != null)
 			pathLength = previousNode.getPathLength() + 1;
 		else
@@ -131,6 +136,13 @@ public class StateNode<N extends Node, C extends Cost<C>> {
 	 */
 	public StateNode<N, C> getPreviousNode() {
 		return previousNode;
+	}
+	
+	@Override
+	public String toString() {
+		return "StateNode(node="+getNode().toString()+"; score="+getScore().toString()+
+				"; cost="+getAcumulatedCost().toString()+
+				"; heuristic="+getHeuristic().toString()+")";
 	}
 	
 }
