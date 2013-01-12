@@ -163,7 +163,7 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 	private void helperImplementationTest() {
 		// the goal node's heuristic value must be zero
 		//TODO is da zo?
-		if(helper.calculateHeuristic(helper.getGoalNode()) != helper.getZeroCost()) {
+		if(!helper.calculateHeuristic(helper.getGoalNode()).equals(helper.getZeroCost())) {
 			throw new IllegalStateException("helper.calculateHeuristic(helper.getGoalNode()) != helper.getZeroCost()");
 		}
 		
