@@ -27,7 +27,7 @@ package com.googlecode.javastar;
  * @license	Apache License, Version 2.0
  *
  */
-public abstract class Node {
+public interface Node {
 	
 	@Override
 	public abstract boolean equals(Object obj);

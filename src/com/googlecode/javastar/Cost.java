@@ -24,7 +24,7 @@ package com.googlecode.javastar;
  * @license	Apache License, Version 2.0
  *
  */
-public abstract class Cost<MyCost> implements Comparable<MyCost> {
+public interface Cost<MyCost> extends Comparable<MyCost> {
 	
 	/**
 	 * Add another cost to this one. The result will be the sum of both.
@@ -35,11 +35,8 @@ public abstract class Cost<MyCost> implements Comparable<MyCost> {
 	 * @return	the sum of this cost with <code>cost</code>
 	 * 			<br />| <code>result == this + cost</code>
 	 */
-	public abstract MyCost add(MyCost cost);
+	public MyCost add(MyCost cost);
 	
 	@Override
-	public abstract int compareTo(MyCost other);
-	
-	@Override
-	public abstract boolean equals(Object obj);
+	public int compareTo(MyCost other);
 }
