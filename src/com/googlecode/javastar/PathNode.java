@@ -138,6 +138,23 @@ public class PathNode<N extends Node, C extends Cost<C>> {
 		return previousNode;
 	}
 	
+	/**
+	 * When a node moves out of the set of open nodes, but is still used by other open nodes
+	 * to form the linked list that is the total path, this method is called.
+	 * It removes all information that is no longer needed to free up space.
+	 */
+	public void archive() {
+		// (clearing primitive types makes no sense)
+		//   (making pathLengt an Integer object either because references take 4 bytes 
+		//    as well, sometimes even 8)
+		accumulatedCost = null;
+		heuristic = null;
+	}
+	
+	public boolean isArchived() {
+		return accumulatedCost == null;
+	}
+	
 	@Override
 	public String toString() {
 		return "PathNode(node="+getNode().toString()+"; score="+getScore().toString()+

@@ -286,6 +286,7 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 		
 		numberOfNodesExpanded++;
 		frontier.remove(node.getNode());
+		node.archive();
 	}
 	
 	private boolean containsLoops(PathNode<N, C> node) {
