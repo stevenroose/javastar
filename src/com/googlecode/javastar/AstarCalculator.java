@@ -17,6 +17,7 @@ package com.googlecode.javastar;
 
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Set;
 
@@ -154,6 +155,47 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 						frontier.get(node2).getScore());
 			}
 		});
+		
+		// check the setup for correct implementation
+		expanderImplementationTest();
+	}
+	
+	private void expanderImplementationTest() {
+		// the goal node's heuristic value must be zero
+		//TODO is da zo?
+		if(expander.calculateHeuristic(expander.getGoalNode()) != expander.getZeroCost()) {
+			throw new IllegalStateException("expander.calculateHeuristic(expander.getGoalNode()) != expander.getZeroCost()");
+		}
+		
+		// testing Node.equals and Node.hashCode value
+		// and Cost.compareTo() implementation
+		
+		Set<N> set1 = expander.expand(expander.getStartNode());
+		Set<N> set2 = expander.expand(expander.getStartNode());
+		// sets must contain only equal items, will not check for same order:
+		for(N n1 : new HashSet<N>(set1)) {
+			for(N n2 : new HashSet<N>(set2)) {
+				if(n1.equals(n2) && n1.hashCode() == n2.hashCode()) {
+					// check of costs between nodes are all correct
+					C c1 = expander.getCostBetweenNodes(expander.getStartNode(), n1);
+					C c2 = expander.getCostBetweenNodes(expander.getStartNode(), n2);
+					if(c1.compareTo(c2) != 0) {
+						throw new IllegalStateException("Cost.compareTo() is not implemented correctly!");
+					}
+					if(c1.compareTo(expander.getZeroCost()) <= 0) {
+						throw new IllegalStateException("Either Cost.compareTo() or " +
+								"expander.getZeroCost() is not implemented correctly");
+					}
+					// remove the 2 matching nodes
+					set1.remove(n1);
+					set2.remove(n2);
+				}
+			}
+		}
+		if(!(set1.isEmpty() && set2.isEmpty())) {
+			throw new IllegalStateException("equals and hashCode functions of Nodes need to " +
+					"be implemented according to their specification!");
+		}
 	}
 	
 	/**
