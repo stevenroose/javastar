@@ -273,17 +273,11 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 				continue;
 			}
 			
-			// BACKTRACKING
+			// LOOP CHECKING
 			//TODO make setting to disable backtracking or to
 			//	use a set with all expanded nodes to backtrack in
 			if(true) {
-				StateNode<N, C> prevNode = node.getPreviousNode();
-				while(prevNode != null) {
-					if(prevNode.getNode().equals(node.getNode()))
-						break;
-					prevNode = prevNode.getPreviousNode();
-				}
-				if(prevNode != null)
+				if(containsLoops(node))
 					continue;
 			}
 			
@@ -292,6 +286,16 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 		
 		numberOfNodesExpanded++;
 		frontier.remove(node.getNode());
+	}
+	
+	private boolean containsLoops(StateNode<N, C> node) {
+		StateNode<N, C> prevNode = node.getPreviousNode();
+		while(prevNode != null) {
+			if(prevNode.getNode().equals(node.getNode()))
+				return true;
+			prevNode = prevNode.getPreviousNode();
+		}
+		return false;
 	}
 	
 	/**
