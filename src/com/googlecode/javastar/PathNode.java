@@ -17,7 +17,7 @@ package com.googlecode.javastar;
 
 /**
  * This class represents nodes in the graph while the algorithm is expanding it.
- * Each StateNode contains of a Node to represent the node in the network and of cost
+ * Each PathNode contains of a Node to represent the node in the network and of cost
  * and heuristic values, as well as a previous node from which this node has been expanded.
  * <br />
  * This class should not be edited to use JavAstar.
@@ -26,7 +26,7 @@ package com.googlecode.javastar;
  * @license	Apache License, Version 2.0
  *
  */
-public class StateNode<N extends Node, C extends Cost<C>> {
+public class PathNode<N extends Node, C extends Cost<C>> {
 	
 	private N node;
 	
@@ -34,15 +34,15 @@ public class StateNode<N extends Node, C extends Cost<C>> {
 	
 	private C heuristic;
 	
-	private StateNode<N, C> previousNode;
+	private PathNode<N, C> previousNode;
 	
 	private int pathLength;
 	
 	/**
-	 * Create a new StateNode
+	 * Create a new PathNode
 	 * 
 	 * @param 	node
-	 * 			the node this StateNode should represent
+	 * 			the node this PathNode should represent
 	 * @param 	accumulatedCost
 	 * 			the cost of the node
 	 * @param 	heuristic
@@ -54,13 +54,13 @@ public class StateNode<N extends Node, C extends Cost<C>> {
 	 * 			If either of <code>node</code>, <code>cumulatedCost</code> or 
 	 * 			<code>heuristic</code> is <code>null</code>.
 	 */
-	public StateNode(N node, C accumulatedCost, C heuristic, StateNode<N, C> previousNode) throws IllegalArgumentException {
+	public PathNode(N node, C accumulatedCost, C heuristic, PathNode<N, C> previousNode) throws IllegalArgumentException {
 		if(node == null)
-			throw new IllegalArgumentException("A StateNode's node cannot be null");
+			throw new IllegalArgumentException("A PathNode's node cannot be null");
 		if(accumulatedCost == null)
-			throw new IllegalArgumentException("A StateNode's cost cannot be null");
+			throw new IllegalArgumentException("A PathNode's cost cannot be null");
 		if(heuristic == null)
-			throw new IllegalArgumentException("A StateNode's heuristic value cannot be null");
+			throw new IllegalArgumentException("A PathNode's heuristic value cannot be null");
 		
 		this.node = node;
 		this.accumulatedCost = accumulatedCost;
@@ -75,9 +75,9 @@ public class StateNode<N extends Node, C extends Cost<C>> {
 	}
 	
 	/**
-	 * Returns the node that is represented by this StateNode
+	 * Returns the node that is represented by this PathNode
 	 * 
-	 * @return	the node that is represented by this StateNode
+	 * @return	the node that is represented by this PathNode
 	 */
 	public N getNode() {
 		return node;
@@ -134,13 +134,13 @@ public class StateNode<N extends Node, C extends Cost<C>> {
 	 * @return	The node from which this node has been expanded.
 	 * 			<code>null</code> if this is the start node.
 	 */
-	public StateNode<N, C> getPreviousNode() {
+	public PathNode<N, C> getPreviousNode() {
 		return previousNode;
 	}
 	
 	@Override
 	public String toString() {
-		return "StateNode(node="+getNode().toString()+"; score="+getScore().toString()+
+		return "PathNode(node="+getNode().toString()+"; score="+getScore().toString()+
 				"; cost="+getAcumulatedCost().toString()+
 				"; heuristic="+getHeuristic().toString()+")";
 	}

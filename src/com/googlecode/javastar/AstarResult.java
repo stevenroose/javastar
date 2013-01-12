@@ -83,7 +83,7 @@ public class AstarResult<N extends Node, C extends Cost<C>> {
 	
 	private final ResultType type;
 	
-	private final StateNode<N, C> endNode;
+	private final PathNode<N, C> endNode;
 	
 	private final long numberOfNodesExpanded;
 	
@@ -97,7 +97,7 @@ public class AstarResult<N extends Node, C extends Cost<C>> {
 	 * @param	endNode
 	 * 			the last node in the path
 	 */
-	public AstarResult(ResultType type, StateNode<N, C> endNode, long numberOfNodesExpanded, long calculationTime) {
+	public AstarResult(ResultType type, PathNode<N, C> endNode, long numberOfNodesExpanded, long calculationTime) {
 		this.type = type;
 		this.endNode = endNode;
 		this.numberOfNodesExpanded = numberOfNodesExpanded;
@@ -146,7 +146,7 @@ public class AstarResult<N extends Node, C extends Cost<C>> {
 			return null;
 		
 		LinkedList<N> result = new LinkedList<N>();
-		StateNode<N, C> curr = endNode;
+		PathNode<N, C> curr = endNode;
 		result.addFirst(curr.getNode());
 		while(curr.getPreviousNode() != null) {
 			curr = curr.getPreviousNode();

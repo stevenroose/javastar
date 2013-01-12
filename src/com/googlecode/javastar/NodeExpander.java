@@ -145,7 +145,7 @@ public abstract class NodeExpander<N extends Node, C extends Cost<C>> {
 	}
 	
 	/**
-	 * Expand a StateNode to a Set of StateNodes.
+	 * Expand a PathNode to a Set of PathNodes.
 	 * This method uses the NodeExpander.expand() method and adds cost and heuristic values.
 	 * 
 	 * @param 	node
@@ -153,12 +153,12 @@ public abstract class NodeExpander<N extends Node, C extends Cost<C>> {
 	 * 
 	 * @return	the expansion of <code>node</code>
 	 */
-	public final Set<StateNode<N, C>> expand(StateNode<N, C> node) {
-		Set<StateNode<N, C>> expansion = new HashSet<StateNode<N,C>>();
+	public final Set<PathNode<N, C>> expand(PathNode<N, C> node) {
+		Set<PathNode<N, C>> expansion = new HashSet<PathNode<N,C>>();
 		for(N n : expand(node.getNode())) {
 			if(n.equals(node.getPreviousNode()))
 				continue;
-			expansion.add(new StateNode<N, C>(n, 
+			expansion.add(new PathNode<N, C>(n, 
 					node.getAcumulatedCost().add(getCostBetweenNodes(node.getNode(), n)), 
 					calculateHeuristic(n), 
 					node));

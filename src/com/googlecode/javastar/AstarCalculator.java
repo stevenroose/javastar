@@ -46,7 +46,7 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 	 * This HashMap is used for <code>get()</code>, <code>put()</code> and <code>containsKey()</code> 
 	 * operations, which happen in constant time.
 	 */
-	private HashMap<N, StateNode<N, C>> frontier;
+	private HashMap<N, PathNode<N, C>> frontier;
 	/**
 	 * This PriorityQueue is used for sorting the frontier, but based on the keys only.
 	 * Primarily the methods <code>peek()</code> and <code>poll()</code> are used, which happen 
@@ -96,7 +96,7 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 		state = State.RUNNING;
 		startTime = System.currentTimeMillis();
 		initialize();
-		addNode(new StateNode<N, C>(expander.getStartNode(), 
+		addNode(new PathNode<N, C>(expander.getStartNode(), 
 				expander.getZeroCost(), 
 				expander.calculateHeuristic(expander.getStartNode()), 
 				null));
@@ -147,7 +147,7 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 		result = null;
 		numberOfNodesExpanded = 0;
 		
-		frontier = new HashMap<N, StateNode<N,C>>();
+		frontier = new HashMap<N, PathNode<N,C>>();
 		queue = new PriorityQueue<N>(10, new Comparator<N>() {
 			@Override
 			public int compare(N node1, N node2) {
@@ -203,7 +203,7 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 	 */
 	private void expandAll() {
 		while(shouldExtractMore()) {
-			StateNode<N, C> first = frontier.get(queue.poll());
+			PathNode<N, C> first = frontier.get(queue.poll());
 			expand(first);
 		}
 	}
@@ -234,7 +234,7 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 		}
 		
 		if(expander.isStopCriteriumEnabled()) {
-			StateNode<N, C> currentNode = frontier.get(queue.peek());
+			PathNode<N, C> currentNode = frontier.get(queue.peek());
 			if( expander.isStopCriteriumReached(numberOfNodesExpanded,
 					currentNode.getAcumulatedCost(), 
 					currentNode.getHeuristic(),
@@ -260,10 +260,10 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 	 * @param 	node
 	 * 			the node to expand
 	 */
-	private void expand(StateNode<N, C> node) {
-		Set<StateNode<N, C>> expansion = expander.expand(node);
+	private void expand(PathNode<N, C> node) {
+		Set<PathNode<N, C>> expansion = expander.expand(node);
 		
-		for(StateNode<N, C> n : expansion) {
+		for(PathNode<N, C> n : expansion) {
 			// check if the node is already in the frontier
 			if(frontier.containsKey(n.getNode())) {
 				if(frontier.get(n.getNode()).getScore().compareTo(n.getScore()) > 0) {
@@ -288,8 +288,8 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 		frontier.remove(node.getNode());
 	}
 	
-	private boolean containsLoops(StateNode<N, C> node) {
-		StateNode<N, C> prevNode = node.getPreviousNode();
+	private boolean containsLoops(PathNode<N, C> node) {
+		PathNode<N, C> prevNode = node.getPreviousNode();
 		while(prevNode != null) {
 			if(prevNode.getNode().equals(node.getNode()))
 				return true;
@@ -324,7 +324,7 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 	 * @param 	node
 	 * 			the node to add
 	 */
-	private void addNode(StateNode<N, C> node) {
+	private void addNode(PathNode<N, C> node) {
 		frontier.put(node.getNode(), node);
 		queue.add(node.getNode());
 	}
@@ -335,7 +335,7 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 	 * @param 	node
 	 * 			the node to remove
 	 */
-	private void removeNode(StateNode<N, C> node) {
+	private void removeNode(PathNode<N, C> node) {
 		queue.remove(node.getNode());
 		frontier.remove(node.getNode());
 	}
