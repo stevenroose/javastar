@@ -33,15 +33,15 @@ import com.googlecode.javastar.AstarResult.ResultType;
  *
  */
 public class AstarCalculator<N extends Node, C extends Cost<C>> {
-	
+
 	private enum State {
 		WAITING,
 		RUNNING,
 		FINISHED
 	}
-	
+
 	private State state;
-	
+
 	/**
 	 * This HashMap is used for <code>get()</code>, <code>put()</code> and <code>containsKey()</code> 
 	 * operations, which happen in constant time.
@@ -54,14 +54,14 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 	 * Sometimes the <code>remove(Object)</code> method is used, which happens in linear time. 
 	 */
 	private PriorityQueue<N> queue;
-	
+
 	private AstarHelper<N, C> helper;
-	
+
 	/**
 	 * A counter for the total number of nodes that are expanded.
 	 */
 	private long numberOfNodesExpanded;
-	
+
 	/**
 	 * The type of the produced result.
 	 */
@@ -70,15 +70,15 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 	 * The produced result.
 	 */
 	private AstarResult<N, C> result;
-	
+
 	/**
 	 * The time on whoch the actual calculation has begon.
 	 */
 	private long startTime;
-	
+
 	private long maximumNumberOfNodesToExpand = 0;
-	
-	
+
+
 	/**
 	 * Create a new A star calculator object with your own AstarHelper subclass.
 	 */
@@ -86,7 +86,7 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 		this.helper = astarHelper;
 		this.state = State.WAITING;
 	}
-	
+
 	/**
 	 * Run the calculation.
 	 * 
@@ -104,7 +104,7 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 		createResult();
 		state = State.FINISHED;
 	}
-	
+
 	/**
 	 * Specify how many nodes should be expanded at most. 
 	 * The algorithm will stop if this number of nodes have been expanded.
@@ -125,7 +125,7 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 			throw new IllegalArgumentException("Argument must be at least 0.");
 		this.maximumNumberOfNodesToExpand = maximumNumberOfNodesToExpand;
 	}
-	
+
 	/**
 	 * Retrieve the result of the last A star calculation.
 	 * When no calculation has been performed, <code>null</code> is returned.
@@ -139,14 +139,14 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 	public AstarResult<N, C> getResult() {
 		return result;
 	}
-	
+
 	/**
 	 * Initialize the necessary variables needed for the calculation.
 	 */
 	private void initialize() {
 		result = null;
 		numberOfNodesExpanded = 0;
-		
+
 		frontier = new HashMap<N, PathNode<N,C>>();
 		queue = new PriorityQueue<N>(10, new Comparator<N>() {
 			@Override
@@ -155,21 +155,22 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 						frontier.get(node2).getScore());
 			}
 		});
-		
+
 		// check the setup for correct implementation
 		helperImplementationTest();
 	}
-	
+
 	private void helperImplementationTest() {
-		// the goal node's heuristic value must be zero
-		//TODO is da zo?
-		if(!helper.calculateHeuristic(helper.getGoalNode()).equals(helper.getZeroCost())) {
-			throw new IllegalStateException("helper.calculateHeuristic(helper.getGoalNode()) != helper.getZeroCost()");
+		// the goal node's heuristic value must be zero if it is monotone
+		if(helper.isHeuristicMonotone()) {
+			if(!helper.calculateHeuristic(helper.getGoalNode()).equals(helper.getZeroCost())) {
+				throw new IllegalStateException("The goal node must have a heuristic value of zero under monotonicity.");
+			}
 		}
-		
+
 		// testing Node.equals and Node.hashCode value
 		// and Cost.compareTo() implementation
-		
+
 		Set<N> set1 = helper.expand(helper.getStartNode());
 		Set<N> set2 = helper.expand(helper.getStartNode());
 		// sets must contain only equal items, will not check for same order:
@@ -197,7 +198,7 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 					"be implemented according to their specification!");
 		}
 	}
-	
+
 	/**
 	 * Perform the actual expansion of the network.
 	 */
@@ -207,7 +208,7 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 			expand(first);
 		}
 	}
-	
+
 	/**
 	 * Defines the condition whether or not to do another expansion. 
 	 * 
@@ -219,20 +220,20 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 			resultType = ResultType.FAIL_ALL_NODES_EXPANDED;
 			return false;
 		}
-		
+
 		if( queue.peek().equals(helper.getGoalNode()) ) {
 			// solution found
 			resultType = ResultType.SUCCESS;
 			return false;
 		}
-		
+
 		if( maximumNumberOfNodesToExpand != 0 && 
 				numberOfNodesExpanded >= maximumNumberOfNodesToExpand ) {
 			// expanded the maximum number of nodes
 			resultType = ResultType.FAIL_MAX_NODES_EXPANDED;
 			return false;
 		}
-		
+
 		if(helper.isStopCriteriumEnabled()) {
 			PathNode<N, C> currentNode = frontier.get(queue.peek());
 			if( helper.isStopCriteriumReached(numberOfNodesExpanded,
@@ -244,10 +245,10 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
-	
+
 	/**
 	 * Expand a node and put the child nodes into the frontier.
 	 * <br />
@@ -262,33 +263,33 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 	 */
 	private void expand(PathNode<N, C> node) {
 		Set<PathNode<N, C>> expansion = helper.expand(node);
-		
+
 		for(PathNode<N, C> n : expansion) {
 			// check if the node is already in the frontier
 			if(frontier.containsKey(n.getNode())) {
-				if(frontier.get(n.getNode()).getScore().compareTo(n.getScore()) > 0) {
+				if(helper.isHeuristicMonotone() || frontier.get(n.getNode()).getScore().compareTo(n.getScore()) > 0) {
 					removeNode(frontier.get(n.getNode()));
 					addNode(n);
 				}
 				continue;
 			}
-			
+
 			// LOOP CHECKING
-			//TODO make setting to disable backtracking or to
-			//	use a set with all expanded nodes to backtrack in
+			//TODO make setting to disable loopchecking or to
+			//	use a set with all expanded nodes to loopcheck with
 			if(true) {
 				if(containsLoops(node))
 					continue;
 			}
-			
+
 			addNode(n);
 		}
-		
+
 		numberOfNodesExpanded++;
 		frontier.remove(node.getNode());
 		node.archive();
 	}
-	
+
 	private boolean containsLoops(PathNode<N, C> node) {
 		PathNode<N, C> prevNode = node.getPreviousNode();
 		while(prevNode != null) {
@@ -298,7 +299,7 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Create the result object.
 	 */
@@ -318,7 +319,7 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 					System.currentTimeMillis() - startTime);
 		}
 	}
-	
+
 	/**
 	 * Add a node to the frontier.
 	 * 
@@ -329,7 +330,7 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 		frontier.put(node.getNode(), node);
 		queue.add(node.getNode());
 	}
-	
+
 	/**
 	 * Remove a node from the frontier.
 	 * 

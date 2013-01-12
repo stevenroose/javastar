@@ -68,6 +68,25 @@ public abstract class AstarHelper<N extends Node, C extends Cost<C>> {
 	public abstract C calculateHeuristic(N node);
 	
 	/**
+	 * Let this method return <code>true</code> if the used heuristic is monotone.
+	 * 
+	 * Using monotone, or consistent, heuristics makes the A* algorithm faster generally, 
+	 * but it also makes some checks redundant.
+	 * So, it is not necessary to change this method when a monotone heuristic is used,
+	 * but it is recommended.
+	 * <br />
+	 * For more information about monotone/consistent heuristics and for the exact conditions, 
+	 * check <a href="http://en.wikipedia.org/wiki/Consistent_heuristic">Wikipedia</a>.
+	 * <br />
+	 * Obviously, this method's default value is <code>false</code>.
+	 * 
+	 * @return	<code>true</code> if the used heuristic is monotone, <code>false</code> otherwise
+	 */
+	public boolean isHeuristicMonotone() {
+		return false;
+	}
+	
+	/**
 	 * Calculate the cost to move from node <code>from</code> to 
 	 * adjacent node <code>to</code>.
 	 * <br />
