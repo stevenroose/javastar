@@ -29,20 +29,20 @@ import java.util.Set;
  * @license	Apache License, Version 2.0
  *
  */
-public abstract class NodeExpander<N extends Node, C extends Cost<C>> {
+public abstract class AstarHelper<N extends Node, C extends Cost<C>> {
 	
 	private N startNode;
 	private N goalNode;
 	
 	/**
-	 * Create a new NodeExpander object with a start and a goal node given.
+	 * Create a new AstarHelper object with a start and a goal node given.
 	 * 
 	 * @param	startNode
 	 * 			the start node
 	 * @param	goalNode
 	 * 			the goal node
 	 */
-	public NodeExpander(N startNode, N goalNode) {
+	public AstarHelper(N startNode, N goalNode) {
 		this.startNode = startNode;
 		this.goalNode = goalNode;
 	}
@@ -146,7 +146,7 @@ public abstract class NodeExpander<N extends Node, C extends Cost<C>> {
 	
 	/**
 	 * Expand a PathNode to a Set of PathNodes.
-	 * This method uses the NodeExpander.expand() method and adds cost and heuristic values.
+	 * This method uses the AstarHelper.expand() method and adds cost and heuristic values.
 	 * 
 	 * @param 	node
 	 * 			the node to expand

@@ -26,7 +26,7 @@ import com.googlecode.javastar.AstarResult.ResultType;
 /**
  * The actual A star calculation happens within this class.
  * <br />
- * This class heavily relies on the NodeExpander subclass that is provided upon construction.
+ * This class heavily relies on the AstarHelper subclass that is provided upon construction.
  * 
  * @author 	Steven Roose
  * @license	Apache License, Version 2.0
@@ -55,7 +55,7 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 	 */
 	private PriorityQueue<N> queue;
 	
-	private NodeExpander<N, C> expander;
+	private AstarHelper<N, C> helper;
 	
 	/**
 	 * A counter for the total number of nodes that are expanded.
@@ -80,10 +80,10 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 	
 	
 	/**
-	 * Create a new A star calculator object with your own NodeExpander subclass.
+	 * Create a new A star calculator object with your own AstarHelper subclass.
 	 */
-	public AstarCalculator(NodeExpander<N, C> nodeExpander) {
-		this.expander = nodeExpander;
+	public AstarCalculator(AstarHelper<N, C> astarHelper) {
+		this.helper = astarHelper;
 		this.state = State.WAITING;
 	}
 	
@@ -96,9 +96,9 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 		state = State.RUNNING;
 		startTime = System.currentTimeMillis();
 		initialize();
-		addNode(new PathNode<N, C>(expander.getStartNode(), 
-				expander.getZeroCost(), 
-				expander.calculateHeuristic(expander.getStartNode()), 
+		addNode(new PathNode<N, C>(helper.getStartNode(), 
+				helper.getZeroCost(), 
+				helper.calculateHeuristic(helper.getStartNode()), 
 				null));
 		expandAll();
 		createResult();
@@ -157,34 +157,34 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 		});
 		
 		// check the setup for correct implementation
-		expanderImplementationTest();
+		helperImplementationTest();
 	}
 	
-	private void expanderImplementationTest() {
+	private void helperImplementationTest() {
 		// the goal node's heuristic value must be zero
 		//TODO is da zo?
-		if(expander.calculateHeuristic(expander.getGoalNode()) != expander.getZeroCost()) {
-			throw new IllegalStateException("expander.calculateHeuristic(expander.getGoalNode()) != expander.getZeroCost()");
+		if(helper.calculateHeuristic(helper.getGoalNode()) != helper.getZeroCost()) {
+			throw new IllegalStateException("helper.calculateHeuristic(helper.getGoalNode()) != helper.getZeroCost()");
 		}
 		
 		// testing Node.equals and Node.hashCode value
 		// and Cost.compareTo() implementation
 		
-		Set<N> set1 = expander.expand(expander.getStartNode());
-		Set<N> set2 = expander.expand(expander.getStartNode());
+		Set<N> set1 = helper.expand(helper.getStartNode());
+		Set<N> set2 = helper.expand(helper.getStartNode());
 		// sets must contain only equal items, will not check for same order:
 		for(N n1 : new HashSet<N>(set1)) {
 			for(N n2 : new HashSet<N>(set2)) {
 				if(n1.equals(n2) && n1.hashCode() == n2.hashCode()) {
 					// check of costs between nodes are all correct
-					C c1 = expander.getCostBetweenNodes(expander.getStartNode(), n1);
-					C c2 = expander.getCostBetweenNodes(expander.getStartNode(), n2);
+					C c1 = helper.getCostBetweenNodes(helper.getStartNode(), n1);
+					C c2 = helper.getCostBetweenNodes(helper.getStartNode(), n2);
 					if(c1.compareTo(c2) != 0) {
 						throw new IllegalStateException("Cost.compareTo() is not implemented correctly!");
 					}
-					if(c1.compareTo(expander.getZeroCost()) <= 0) {
+					if(c1.compareTo(helper.getZeroCost()) <= 0) {
 						throw new IllegalStateException("Either Cost.compareTo() or " +
-								"expander.getZeroCost() is not implemented correctly");
+								"helper.getZeroCost() is not implemented correctly");
 					}
 					// remove the 2 matching nodes
 					set1.remove(n1);
@@ -220,7 +220,7 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 			return false;
 		}
 		
-		if( queue.peek().equals(expander.getGoalNode()) ) {
+		if( queue.peek().equals(helper.getGoalNode()) ) {
 			// solution found
 			resultType = ResultType.SUCCESS;
 			return false;
@@ -233,9 +233,9 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 			return false;
 		}
 		
-		if(expander.isStopCriteriumEnabled()) {
+		if(helper.isStopCriteriumEnabled()) {
 			PathNode<N, C> currentNode = frontier.get(queue.peek());
-			if( expander.isStopCriteriumReached(numberOfNodesExpanded,
+			if( helper.isStopCriteriumReached(numberOfNodesExpanded,
 					currentNode.getAcumulatedCost(), 
 					currentNode.getHeuristic(),
 					currentNode.getPathLength()) ) {
@@ -261,7 +261,7 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 	 * 			the node to expand
 	 */
 	private void expand(PathNode<N, C> node) {
-		Set<PathNode<N, C>> expansion = expander.expand(node);
+		Set<PathNode<N, C>> expansion = helper.expand(node);
 		
 		for(PathNode<N, C> n : expansion) {
 			// check if the node is already in the frontier
