@@ -134,9 +134,14 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 	 * - <code>result.getType() == SUCCESS</code> if the calculation was successful <br />
 	 * - <code>result.getType() == FAIL</code> if the calculation failed
 	 * 
+	 * @throws	IllegalStateException
+	 * 			If the calculation is not yet finished.
+	 * 
 	 * @return	the result of the last A star calculation
 	 */
 	public AstarResult<N, C> getResult() {
+		if(state != State.FINISHED)
+			throw new IllegalStateException("Calculation is not yet finished.");
 		return result;
 	}
 
@@ -210,7 +215,7 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 	}
 
 	/**
-	 * Defines the condition whether or not to do another expansion. 
+	 * Defines whether or not to do another expansion. 
 	 * 
 	 * @return	whether or not another expansion should be done
 	 */
@@ -263,41 +268,68 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 	 */
 	private void expand(PathNode<N, C> node) {
 		Set<PathNode<N, C>> expansion = helper.expand(node);
-
+		
 		for(PathNode<N, C> n : expansion) {
-			// check if the node is already in the frontier
-			if(frontier.containsKey(n.getNode())) {
-				if(helper.isHeuristicMonotone() || frontier.get(n.getNode()).getScore().compareTo(n.getScore()) > 0) {
-					removeNode(frontier.get(n.getNode()));
-					addNode(n);
-				}
-				continue;
-			}
-
-			// LOOP CHECKING
-			//TODO make setting to disable loopchecking or to
-			//	use a set with all expanded nodes to loopcheck with
-			if(true) {
-				if(containsLoops(node))
-					continue;
-			}
-
-			addNode(n);
+			exploreNode(node, n);
 		}
-
+		
 		numberOfNodesExpanded++;
+		
+		// remove the node
 		frontier.remove(node.getNode());
 		node.archive();
+		
+		//TODO deleteRedundantPaths
 	}
 
+	/**
+	 * @param node
+	 * @param n
+	 */
+	private void exploreNode(PathNode<N, C> node,
+			PathNode<N, C> n) {
+		// check if the node is already in the frontier
+		if(frontier.containsKey(n.getNode())) {
+			if(helper.isHeuristicMonotone())
+				return; // new node is always worse than first one found
+			if(frontier.get(n.getNode()).getScore().compareTo(n.getScore()) > 0) {
+				removeNode(frontier.get(n.getNode()));
+				addNode(n);
+			}
+			return;
+		}
+
+		// LOOP CHECKING
+		//TODO make setting to disable loopchecking or to
+		//	use a set with all expanded nodes to loopcheck with
+		if(true) {
+			if(containsLoops(node))
+				return;
+		}
+
+		addNode(n);
+	}
+	
+	/**
+	 * Checks the node for loops.
+	 * 
+	 * @param 	node
+	 * 			the node to check
+	 * @return	<code>true</code> if <code>node</code> contains loops, <code>false</code> otherwise
+	 */
 	private boolean containsLoops(PathNode<N, C> node) {
+		if(node.getPreviousNode() == null)
+			return false;
+		return node.getPreviousNode().hasNodeInPath(node.getNode());
+		
+		/* // the long way for when previousNodes are not stored
 		PathNode<N, C> prevNode = node.getPreviousNode();
 		while(prevNode != null) {
 			if(prevNode.getNode().equals(node.getNode()))
 				return true;
 			prevNode = prevNode.getPreviousNode();
 		}
-		return false;
+		return false; */
 	}
 
 	/**

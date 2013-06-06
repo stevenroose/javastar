@@ -15,6 +15,9 @@
 
 package com.googlecode.javastar;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * This class represents nodes in the graph while the algorithm is expanding it.
  * Each PathNode contains of a Node to represent the node in the network and of cost
@@ -37,6 +40,8 @@ public class PathNode<N extends Node, C extends Cost<C>> {
 	private PathNode<N, C> previousNode;
 	
 	private int pathLength;
+	
+	private Set<N> previousNodes; // A HashSet is used for high .contains() performance.
 	
 	/**
 	 * Create a new PathNode
@@ -66,6 +71,11 @@ public class PathNode<N extends Node, C extends Cost<C>> {
 		this.accumulatedCost = accumulatedCost;
 		this.heuristic = heuristic;
 		this.previousNode = previousNode;
+		if(previousNode == null)
+			this.previousNodes = new HashSet<N>();
+		else
+			this.previousNodes = previousNode.getPreviousNodes();
+		this.previousNodes.add(node);
 		
 		// increment previous pathLength or set to zero for start node
 		if(previousNode != null)
@@ -131,11 +141,37 @@ public class PathNode<N extends Node, C extends Cost<C>> {
 	 * Returns the node from which this node has been expanded. 
 	 * The first node, and the first node only, has a <code>null</code> value for this property;
 	 * 
-	 * @return	The node from which this node has been expanded.
+	 * @return	the node from which this node has been expanded
 	 * 			<code>null</code> if this is the start node.
 	 */
 	public PathNode<N, C> getPreviousNode() {
 		return previousNode;
+	}
+	
+	/**
+	 * Returns all the nodes in the shortest path from the start node to this node.
+	 * 
+	 * It contains the current node as well.
+	 * 
+	 * This set is mostly used to check if a node is already in the path. For that purpose, 
+	 * consider using hasNodeInPath(Node). The use of this method is discouraged.
+	 * 
+	 * @return	a set with all the nodes in the shortest path from the start node to this node
+	 */
+	protected Set<N> getPreviousNodes() {
+		return new HashSet<N>(previousNodes);
+	}
+	
+	/**
+	 * Check if a node is already contained by the shortest path from the start node to this node.
+	 * 
+	 * @param	node
+	 * 			the node to check
+	 * @return	<code>true</code> if <code>node</code> is in the shortest path 
+	 * 			from the start node to this node, <code>false</code> otherwise
+	 */
+	public boolean hasNodeInPath(N node) {
+		return previousNodes.contains(node);
 	}
 	
 	/**
@@ -147,8 +183,16 @@ public class PathNode<N extends Node, C extends Cost<C>> {
 		// (clearing primitive types makes no sense)
 		//   (making pathLengt an Integer object either because references take 4 bytes 
 		//    as well, sometimes even 8)
-		accumulatedCost = null;
+
 		heuristic = null;
+		previousNode = null;
+		accumulatedCost = null;
+
+        //TODO fix the fact that previousNodes has to be kept.
+        //     It should be possible to move that information a node deeper in the tree
+        //      so that nodes can be fully archived.
+        //     BUT note that only these sets of the open nodes and their previous ones are retained,
+        //      still much, so still an opportunity to fix it!
 	}
 	
 	public boolean isArchived() {

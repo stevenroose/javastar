@@ -19,6 +19,8 @@ package com.googlecode.javastar;
  * This class is used to represent costs and heuristic values.
  * The reason that this class is not an interface is to force overriding of 
  * the <code>equals()</code> and the <code>compareTo()</code> methods.
+ * <br />
+ * It is advised to make your <code>Cost</code> implementation an Immutable Class.
  * 
  * @author 	Steven Roose
  * @license	Apache License, Version 2.0

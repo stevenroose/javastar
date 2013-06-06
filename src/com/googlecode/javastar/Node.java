@@ -22,6 +22,8 @@ package com.googlecode.javastar;
  * relies on them.
  * <br />
  * Using good hashCode values means better performance of the algorithm.
+ * <br />
+ * It is advised to make your <code>Node</code> implementation an Immutable Class.
  * 
  * @author 	Steven Roose
  * @license	Apache License, Version 2.0
