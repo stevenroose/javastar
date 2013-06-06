@@ -318,18 +318,7 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 	 * @return	<code>true</code> if <code>node</code> contains loops, <code>false</code> otherwise
 	 */
 	private boolean containsLoops(PathNode<N, C> node) {
-		if(node.getPreviousNode() == null)
-			return false;
-		return node.getPreviousNode().hasNodeInPath(node.getNode());
-		
-		/* // the long way for when previousNodes are not stored
-		PathNode<N, C> prevNode = node.getPreviousNode();
-		while(prevNode != null) {
-			if(prevNode.getNode().equals(node.getNode()))
-				return true;
-			prevNode = prevNode.getPreviousNode();
-		}
-		return false; */
+		return node.hasNodeInPath(node.getNode());
 	}
 
 	/**
