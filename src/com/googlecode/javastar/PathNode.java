@@ -243,9 +243,7 @@ public class PathNode<N extends Node, C extends Cost<C>> {
 					"; heuristic=" + getHeuristic().toString() + ")";
 		}
 		else {
-			return "PathNode(node=" + getNode().toString() + "; score=" + getScore().toString() +
-					"; cost=" + getAcumulatedCost().toString() +
-					"; heuristic=" + getHeuristic().toString() + ")";
+			return "PathNode(node=" + getNode().toString() + ")";
 		}
 	}
 
