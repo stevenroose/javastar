@@ -23,7 +23,11 @@ import java.util.Set;
  * Each PathNode contains of a Node to represent the node in the network and of cost
  * and heuristic values, as well as a previous node from which this node has been expanded.
  * <br />
- * This class should not be edited to use JavAstar.
+ * This class should not be edited to use JavAstar. <br />
+ * <br />
+ * <strong>Note that the behavior of this class cannot be assured after it has been archived.</strong>
+ * Archiving removes most of the internal variables so most functionality will be broken.
+ * No exceptions are thrown to avoid checks in the instances that are not yet archived.
  *
  * @author Steven Roose
  * @license Apache License, Version 2.0
@@ -39,8 +43,6 @@ public class PathNode<N extends Node, C extends Cost<C>> {
 	private C heuristic;
 
 	private PathNode<N, C> previousNode;
-
-	private int pathLength;
 
 	private Set<N> previousNodes; // A HashSet is used for high .contains() performance.
 
@@ -73,12 +75,6 @@ public class PathNode<N extends Node, C extends Cost<C>> {
 			this.previousNodes = previousNode.getPreviousNodes();
 			this.previousNodes.add(previousNode.getNode());
 		}
-
-		// increment previous pathLength or set to zero for start node
-		if (previousNode != null)
-			pathLength = previousNode.getPathLength() + 1;
-		else
-			pathLength = 0;
 	}
 
 	/**
@@ -95,12 +91,8 @@ public class PathNode<N extends Node, C extends Cost<C>> {
 	 *
 	 * @return the accumulated cost of the path from the start node until this node
 	 *
-	 * @throws 	IllegalStateException
-	 * 			If the node is already archived.
 	 */
 	public C getAcumulatedCost() {
-		if(isArchived())
-			throw new IllegalStateException("Node is already archived.");
 		return accumulatedCost;
 	}
 
@@ -112,12 +104,8 @@ public class PathNode<N extends Node, C extends Cost<C>> {
 	 *
 	 * @return the heuristic value from this node
 	 *
-	 * @throws 	IllegalStateException
-	 * 			If the node is already archived.
 	 */
 	public C getHeuristic() {
-		if(isArchived())
-			throw new IllegalStateException("Node is already archived.");
 		return heuristic;
 	}
 
@@ -129,12 +117,11 @@ public class PathNode<N extends Node, C extends Cost<C>> {
 	 *
 	 * @return the sum of the cumulated cost and the heuristic value from this node
 	 *
-	 * @throws 	IllegalStateException
+	 * @throws 	NullPointerException
 	 * 			If the node is already archived.
+	 *
 	 */
 	public C getScore() {
-		if(isArchived())
-			throw new IllegalStateException("Node is already archived.");
 		return getAcumulatedCost().add(getHeuristic());
 	}
 
@@ -144,9 +131,12 @@ public class PathNode<N extends Node, C extends Cost<C>> {
 	 * The start node has path length zero.
 	 *
 	 * @return the number of this node from the start node
+	 *
+	 * @throws 	NullPointerException
+	 * 			If the node is already archived.
 	 */
 	public int getPathLength() {
-		return pathLength;
+		return previousNodes.size();
 	}
 
 	/**
@@ -156,12 +146,8 @@ public class PathNode<N extends Node, C extends Cost<C>> {
 	 * @return the node from which this node has been expanded
 	 * <code>null</code> if this is the start node.
 	 *
-	 * @throws 	IllegalStateException
-	 * 			If the node is already archived.
 	 */
 	public PathNode<N, C> getPreviousNode() {
-		if(isArchived())
-			throw new IllegalStateException("Node is already archived.");
 		return previousNode;
 	}
 
@@ -175,12 +161,8 @@ public class PathNode<N extends Node, C extends Cost<C>> {
 	 *
 	 * @return a set with all the nodes in the shortest path from the start node to this node
 	 *
-	 * @throws 	IllegalStateException
-	 * 			If the node is already archived.
 	 */
 	protected Set<N> getPreviousNodes() {
-		if(isArchived())
-			throw new IllegalStateException("Node is already archived.");
 		return new HashSet<N>(previousNodes);
 	}
 
@@ -194,12 +176,8 @@ public class PathNode<N extends Node, C extends Cost<C>> {
 	 * @return	<code>true</code> if <code>node</code> is in the shortest path
 	 * from the start node to this node, <code>false</code> otherwise
 	 *
-	 * @throws 	IllegalStateException
-	 * 			If the node is already archived.
 	 */
 	public boolean hasNodeInPath(N node) {
-		if(isArchived())
-			throw new IllegalStateException("Node is already archived.");
 		return previousNodes.contains(node);
 	}
 
@@ -209,21 +187,11 @@ public class PathNode<N extends Node, C extends Cost<C>> {
 	 * It removes all information that is no longer needed to free up space.
 	 */
 	public void archive() {
-		// (clearing primitive types makes no sense)
-		//   (making pathLengt an Integer object either because references take 4 bytes 
-		//    as well, sometimes even 8)
-
 		accumulatedCost = null;
 		heuristic = null;
 
 		previousNode = null;
 		previousNodes = null;
-
-		//TODO fix the fact that previousNodes has to be kept.
-		//     It should be possible to move that information a node deeper in the tree
-		//      so that nodes can be fully archived.
-		//     BUT note that only these sets of the open nodes and their previous ones are retained,
-		//      still much, so still an opportunity to fix it!
 	}
 
 	/**
