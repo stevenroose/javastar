@@ -87,24 +87,7 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 		this.state = State.WAITING;
 	}
 
-	/**
-	 * Run the calculation.
-	 * 
-	 * When the calculation is finished, the result will be in <code>getResult()</code>.
-	 */
-	public synchronized void run() {
-		state = State.RUNNING;
-		startTime = System.currentTimeMillis();
-		initialize();
-		addNode(new PathNode<N, C>(helper.getStartNode(), 
-				helper.getZeroCost(), 
-				helper.calculateHeuristic(helper.getStartNode()), 
-				null));
-		expandAll();
-		createResult();
-		state = State.FINISHED;
-	}
-
+	//TODO Should this be part of the helper class?
 	/**
 	 * Specify how many nodes should be expanded at most. 
 	 * The algorithm will stop if this number of nodes have been expanded.
@@ -143,6 +126,24 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 		if(state != State.FINISHED)
 			throw new IllegalStateException("Calculation is not yet finished.");
 		return result;
+	}
+
+	/**
+	 * Run the calculation.
+	 *
+	 * When the calculation is finished, the result will be in <code>getResult()</code>.
+	 */
+	public synchronized void run() {
+		state = State.RUNNING;
+		startTime = System.currentTimeMillis();
+		initialize();
+		addNode(new PathNode<N, C>(helper.getStartNode(),
+				helper.getZeroCost(),
+				helper.calculateHeuristic(helper.getStartNode()),
+				null));
+		expandAll();
+		createResult();
+		state = State.FINISHED;
 	}
 
 	/**
@@ -283,31 +284,35 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 	}
 
 	/**
-	 * @param node
-	 * @param n
+	 * This method is called for every new node that is explored.
+	 * It performs checks and adds the node to the list of open nodes if it qualifies.
+	 *
+	 * @param 	fromNode
+	 * 			the node from which <code>newNode</code> is explored
+	 * @param 	newNode
+	 * 			the node that is being explored and should be checked
 	 */
-	private void exploreNode(PathNode<N, C> node,
-			PathNode<N, C> n) {
+	private void exploreNode(PathNode<N, C> fromNode,
+			PathNode<N, C> newNode) {
 		// check if the node is already in the frontier
-		if(frontier.containsKey(n.getNode())) {
+		if(frontier.containsKey(newNode.getNode())) {
 			if(helper.isHeuristicMonotone())
 				return; // new node is always worse than first one found
-			if(frontier.get(n.getNode()).getScore().compareTo(n.getScore()) > 0) {
-				removeNode(frontier.get(n.getNode()));
-				addNode(n);
+			if(frontier.get(newNode.getNode()).getScore().compareTo(newNode.getScore()) > 0) {
+				removeNode(frontier.get(newNode.getNode()));
+				addNode(newNode);
 			}
-			return;
+			return; // duplicate already in frontier has better score
 		}
 
 		// LOOP CHECKING
-		//TODO make setting to disable loopchecking or to
-		//	use a set with all expanded nodes to loopcheck with
+		//TODO make setting to disable loopchecking
 		if(true) {
-			if(containsLoops(node))
+			if(containsLoops(fromNode))
 				return;
 		}
 
-		addNode(n);
+		addNode(newNode);
 	}
 	
 	/**
@@ -319,26 +324,6 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 	 */
 	private boolean containsLoops(PathNode<N, C> node) {
 		return node.hasNodeInPath(node.getNode());
-	}
-
-	/**
-	 * Create the result object.
-	 */
-	private void createResult() {
-		if(resultType.isSuccess()) {
-			// success
-			result = new AstarResult<N, C>(resultType, 
-					frontier.get(queue.peek()), 
-					numberOfNodesExpanded,
-					System.currentTimeMillis() - startTime);
-		}
-		else {
-			// fail
-			result = new AstarResult<N, C>(resultType, 
-					null, 
-					numberOfNodesExpanded,
-					System.currentTimeMillis() - startTime);
-		}
 	}
 
 	/**
@@ -361,6 +346,26 @@ public class AstarCalculator<N extends Node, C extends Cost<C>> {
 	private void removeNode(PathNode<N, C> node) {
 		queue.remove(node.getNode());
 		frontier.remove(node.getNode());
+	}
+
+	/**
+	 * Create the result object.
+	 */
+	private void createResult() {
+		if(resultType.isSuccess()) {
+			// success
+			result = new AstarResult<N, C>(resultType,
+					frontier.get(queue.peek()),
+					numberOfNodesExpanded,
+					System.currentTimeMillis() - startTime);
+		}
+		else {
+			// fail
+			result = new AstarResult<N, C>(resultType,
+					null,
+					numberOfNodesExpanded,
+					System.currentTimeMillis() - startTime);
+		}
 	}
 
 }
