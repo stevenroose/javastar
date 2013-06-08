@@ -17,7 +17,11 @@ package com.googlecode.javastar;
 
 import com.googlecode.javastar.AstarResult.ResultType;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.PriorityQueue;
+import java.util.Set;
 
 /**
  * The actual A star calculation happens within this class.
