@@ -15,9 +15,9 @@
 
 package tests.simpleorientationtest;
 
-import com.googlecode.javastar.AstarCalculator;
-import com.googlecode.javastar.AstarHelper;
-import com.googlecode.javastar.AstarResult;
+import be.stevenroose.javastar.AstarCalculator;
+import be.stevenroose.javastar.AstarHelper;
+import be.stevenroose.javastar.AstarResult;
 import tests.simpletest.TestCost;
 
 public class OrientationTestMain {

@@ -15,7 +15,7 @@
 
 package tests.simpleorientationtest;
 
-import com.googlecode.javastar.AstarHelper;
+import be.stevenroose.javastar.AstarHelper;
 import tests.simpletest.TestCost;
 import tests.simpletest.TestWorld;
 

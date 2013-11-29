@@ -13,29 +13,27 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.googlecode.javastar;
+package be.stevenroose.javastar;
 
 /**
- * This class is used to represent costs and heuristic values.
- * The reason that this class is not an interface is to force overriding of
- * the <code>equals()</code> and the <code>compareTo()</code> methods.
+ * Node classes should extend this abstract class.
+ * The reason this class is not an interface is to enforce users to override the
+ * <code>equals()</code> and <code>hashCode()</code> methods because the algorithm heavily
+ * relies on them.
  * <br />
- * It is advised to make your <code>Cost</code> implementation an Immutable Class.
+ * Using good hashCode values means better performance of the algorithm.
+ * <br />
+ * It is advised to make your <code>Node</code> implementation an Immutable Class.
  *
  * @author Steven Roose
  * @license Apache License, Version 2.0
  */
-public interface Cost<MyCost> extends Comparable<MyCost> {
-
-	/**
-	 * Add another cost to this one. The result will be the sum of both.
-	 *
-	 * @param cost the cost to add to this cost
-	 * @return the sum of this cost with <code>cost</code>
-	 *         <br />| <code>result == this + cost</code>
-	 */
-	public MyCost add(MyCost cost);
+public interface Node {
 
 	@Override
-	public int compareTo(MyCost other);
+	public abstract boolean equals(Object obj);
+
+	@Override
+	public abstract int hashCode();
+
 }

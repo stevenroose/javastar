@@ -15,7 +15,7 @@
 
 package tests.simpletest;
 
-import com.googlecode.javastar.Node;
+import be.stevenroose.javastar.Node;
 
 public class TestNode implements Node {
 

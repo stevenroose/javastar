@@ -15,7 +15,7 @@
 
 package tests.simpletest;
 
-import com.googlecode.javastar.AstarHelper;
+import be.stevenroose.javastar.AstarHelper;
 
 import java.util.HashSet;
 import java.util.Set;

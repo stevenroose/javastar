@@ -13,9 +13,9 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.googlecode.javastar;
+package be.stevenroose.javastar;
 
-import com.googlecode.javastar.AstarResult.ResultType;
+import be.stevenroose.javastar.AstarResult.ResultType;
 
 import java.util.Comparator;
 import java.util.HashMap;

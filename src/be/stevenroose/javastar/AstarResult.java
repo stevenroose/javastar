@@ -13,7 +13,7 @@
  * limitations under the License.
  ******************************************************************************/
 
-package com.googlecode.javastar;
+package be.stevenroose.javastar;
 
 import java.util.LinkedList;
 import java.util.List;

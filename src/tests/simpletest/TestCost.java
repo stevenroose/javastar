@@ -15,7 +15,7 @@
 
 package tests.simpletest;
 
-import com.googlecode.javastar.Cost;
+import be.stevenroose.javastar.Cost;
 
 public class TestCost implements Cost<TestCost> {
 
